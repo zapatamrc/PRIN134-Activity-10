@@ -19,9 +19,13 @@ playerControl.id = "player-controls";
 playerControl.classList.add("input-group", "mb-3");
 document.getElementById("players").before(playerControl);
 
+const gameControls = document.createElement("div");
+gameControls.classList.add("game-controls", "mb-3");
+document.getElementById("players").after(gameControls);
+
 const footer = document.createElement("p");
 footer.textContent = "Lesson 10: Manipulating Elements - Simple Basketball App";
-document.getElementById("players").after(footer);
+gameControls.after(footer);
 
 const addButton = document.createElement("button");
 addButton.id = "btn-add";
@@ -48,127 +52,116 @@ itemInput.placeholder = "Enter player name";
 playerControl.append(itemInput);
 playerControl.append(addButton);
 
+const playButton = document.createElement("button");
+playButton.id = "btn-play";
+playButton.classList.add("btn", "btn-success");
+playButton.textContent = "PLAY";
+playButton.addEventListener("click", runGame);
+gameControls.append(playButton);
 
+const resultsDiv = document.createElement("div");
+resultsDiv.id = "game-results";
+resultsDiv.classList.add("results-container");
+gameControls.after(resultsDiv);
 
+class Player {
+    constructor(name) {
+        this.name = name;
+        this.score = 0;
+    }
+}
 
+function calculateSuccessRate() {
+    return Math.random();
+}
 
+function shootBall(player, attempts) {
+    for (let i = 0; i < attempts; i++) {
+        if (calculateSuccessRate() > 0.5) {
+            player.score += 1;
+        }
+    }
+}
 
+function rankPlayers(players) {
+    return players.sort((a, b) => b.score - a.score);
+}
 
+function isTie(players) {
+    if (players.length < 2) return false;
+    const topScore = players[0].score;
+    return players.filter(player => player.score === topScore).length > 1;
+}
 
+function getTiedPlayers(players) {
+    const topScore = players[0].score;
+    return players.filter(player => player.score === topScore);
+}
 
+function resetTiedPlayersScores(players) {
+    players.forEach(player => {
+        player.score = 0;
+    });
+}
 
+function displayRoundResults(players, roundNumber, isTieBreaker = false) {
+    const resultsDiv = document.getElementById('game-results');
+    const roundTitle = document.createElement('h3');
+    roundTitle.textContent = isTieBreaker ? 
+        `🏀 Round ${roundNumber + 1}  Results:` : 
+        `🏀 Round ${roundNumber} Results:`;
+    resultsDiv.append(roundTitle);
+    
+    const resultsList = document.createElement('ul');
+    resultsList.classList.add('results-list');
+    
+    players.forEach((player, index) => {
+        const resultItem = document.createElement('li');
+        resultItem.innerHTML = `${index + 1}. ${player.name} - <strong>${player.score}</strong> points`;
+        resultsList.append(resultItem);
+    });
+    
+    resultsDiv.append(resultsList);
+}
 
+function tieBreakerRound(players, attempts, roundNumber) {
+    resetTiedPlayersScores(players);
+    players.forEach(player => {
+        shootBall(player, attempts);
+    });
+    displayRoundResults(players, roundNumber, true);
+}
 
+function runGame() {
+    const playerItems = document.querySelectorAll('#players li');
+    if (playerItems.length <= 1) {
+        alert("Please add at least TWO player first!");
+        return;
+    }
 
+    const resultsDiv = document.getElementById('game-results');
+    resultsDiv.innerHTML = '<h2>🏆 Game Results</h2>';
+    
+    const players = Array.from(playerItems).map(item => new Player(item.textContent));
+    const attemptsPerRound = 10;
 
+    players.forEach(player => shootBall(player, attemptsPerRound));
+    let rankedPlayers = rankPlayers([...players]);
+    displayRoundResults(rankedPlayers, 1);
 
+    let tieBreakerCount = 1;
+    while (isTie(rankedPlayers)) {
+        let tiedPlayers = getTiedPlayers(rankedPlayers);
+        tieBreakerRound(tiedPlayers, attemptsPerRound, tieBreakerCount);
+        rankedPlayers = rankPlayers([...tiedPlayers]);
+        tieBreakerCount++;
+    }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-// class Player {
-//     constructor(name) {
-//         this.name = name;
-//         this.score = 0;
-//     }
-// }
-
-// function calculateSuccessRate() {
-//     return Math.random();
-// }
-
-// function shootBall(player, attempts) {
-//     for (let i = 0; i < attempts; i++) {
-//         if (calculateSuccessRate() > 0.5) {
-//             player.score += 1;
-//         }
-//     }
-// }
-
-// function rankPlayers(players) {
-//     return players.sort((a, b) => b.score - a.score);
-// }
-
-// function isTie(players) {
-//     const topScore = players[0].score;
-//     return players.filter(player => player.score === topScore).length > 1;
-// }
-
-// function getTiedPlayers(players) {
-//     const topScore = players[0].score;
-//     return players.filter(player => player.score === topScore);
-// }
-
-// function resetTiedPlayersScores(players) {
-//     players.forEach(player => {
-//         player.score = 0;
-//     });
-// }
-
-// function tieBreakerRound(players, attempts, roundNumber) {
-//     console.log("\n", String.fromCodePoint(0x1F525), `Tiebreaker Round needed between:`, players.map(p => p.name).join(", "));
-//     console.log("\n", String.fromCodePoint(0x1F3C0), `Round ${roundNumber+1} Begins!`);
-//     resetTiedPlayersScores(players);
-//     players.forEach(player => {
-//         shootBall(player, attempts);
-//         console.log(`${player.name} scored ${player.score} successful shots.`);
-//     });
-// }
-
-// function runGame() {
-//     const players = [];
-
-//     const attemptsPerRound = 5; 
-
-//     players.forEach(player => shootBall(player, attemptsPerRound));
-
-//     let rankedPlayers = rankPlayers(players);
-
-//     console.log(String.fromCodePoint(0x1F3C6), " Rankings after this round:");
-//     rankedPlayers.forEach((player, index) => {
-//         console.log(`${index + 1}. ${player.name} - ${player.score} points`);
-//     });
-
-//     let tieBreakerCount = 1;
-//     while (isTie(rankedPlayers)) {
-//         let tiedPlayers = getTiedPlayers(rankedPlayers);
-//         tieBreakerRound(tiedPlayers, attemptsPerRound, tieBreakerCount);
-//         rankedPlayers = rankPlayers(tiedPlayers);
-//         console.log(String.fromCodePoint(0x1F3C6), " Rankings after this round:");
-//         rankedPlayers.forEach((player, index) => {
-//             console.log(`${index + 1}. ${player.name} - ${player.score} points`);
-//         });
-//         tieBreakerCount++;
-//     }
-
-//     console.log(`\n${String.fromCodePoint(0x1F3C6)} The champion is ${rankedPlayers[0].name} with ${rankedPlayers[0].score} points!`);
-// }
-
-// runGame();
+    const championDiv = document.createElement('div');
+    championDiv.classList.add('champion');
+    championDiv.innerHTML = `
+        <h3>🎉 Champion</h3>
+        <p>${rankedPlayers[0].name} wins with ${rankedPlayers[0].score} points!</p>
+    `;
+    resultsDiv.append(championDiv);
+}
