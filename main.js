@@ -24,7 +24,7 @@ gameControls.classList.add("game-controls", "mb-3");
 document.getElementById("players").after(gameControls);
 
 const footer = document.createElement("p");
-footer.textContent = "Lesson 10: Manipulating Elements - Simple Basketball App";
+footer.textContent = "2025 Marc Anthony Zapata. All rights reserved.";
 gameControls.after(footer);
 
 const addButton = document.createElement("button");
